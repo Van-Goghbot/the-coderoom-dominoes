@@ -8,12 +8,12 @@ class Bezier:
 	"""a representation of a bezier curve, consisting of a series of nodes"""
 	def __init__(self, path_command):
 		self.path_command = path_command
-		self.nodes = []
+		self.p = [] # This stores all the nodes
 		self.conversion()
 
 	def conversion(self):
-	"""Takes the string of coordinates from the SVG and splits them 
-	   into the respective coordinates of the curve"""
+		"""Takes the string of coordinates from the SVG
+		and splits them into the respective coordinates of the curve"""
 
 
 		# Removing command letters from the coordinate string
@@ -34,13 +34,31 @@ class Bezier:
 		coordinates = []
 		for num in coordinate_string:
 			if i % 2 == 0:
-				coord.append(num)
+				coord.append(float(num))
 				coordinates.append(coord)
 			else: # This case happens first
-				coord = [num]
+				coord = [float(num)]
 			i += 1
 
 		for coord in coordinates:
-			self.nodes.append(Node(coord[0], coord[1]))
+			self.p.append(Node(coord[0], coord[1]))
+
+	def B_x(self, t):
+		c0 = (1 - t)**3*self.p[0].x
+		c1 = 3*(1 - t)**2*t*self.p[1].x
+		c2 = 3*(1 - t)*t**2*self.p[2].x
+		c3 = t**3*self.p[3].x
+		return c0 + c1 + c2 + c3
+
+	def B_y(self, t):
+		c0 = (1 - t)**3*self.p[0].y
+		c1 = 3*(1 - t)**2*t*self.p[1].y
+		c2 = 3*(1 - t)*t**2*self.p[2].y
+		c3 = t**3*self.p[3].y
+		return c0 + c1 + c2 + c3
 
 test = Bezier("M184.7,207.5C361,31.2,793.9,322,184.7,736.5")
+
+for i in range(10):
+	t = i/10
+	print(test.B_x(t), test.B_y(t))
