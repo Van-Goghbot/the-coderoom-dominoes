@@ -12,6 +12,11 @@ class Bezier:
 		self.conversion()
 
 	def conversion(self):
+	"""Takes the string of coordinates from the SVG and splits them 
+	   into the respective coordinates of the curve"""
+
+
+		# Removing command letters from the coordinate string
 		coordinate_string = ""
 		for char in self.path_command:
 			if char.isalpha():
@@ -24,8 +29,7 @@ class Bezier:
 		
 		coordinate_string = coordinate_string.split(",")
 
-		print(coordinate_string)
-
+		# Pairs the coordinates (x,y)
 		i = 1
 		coordinates = []
 		for num in coordinate_string:
@@ -36,10 +40,7 @@ class Bezier:
 				coord = [num]
 			i += 1
 
-		print(coordinates)
-
 		for coord in coordinates:
-			print(f'x: {coord[0]} y: {coord[1]}')
 			self.nodes.append(Node(coord[0], coord[1]))
 
 test = Bezier("M184.7,207.5C361,31.2,793.9,322,184.7,736.5")
