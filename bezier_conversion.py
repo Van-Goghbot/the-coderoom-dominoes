@@ -59,6 +59,6 @@ class Bezier:
 
 test = Bezier("M184.7,207.5C361,31.2,793.9,322,184.7,736.5")
 
-for i in range(10):
+for i in range(11):
 	t = i/10
 	print(test.B_x(t), test.B_y(t))
