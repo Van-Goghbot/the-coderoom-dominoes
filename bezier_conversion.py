@@ -21,6 +21,8 @@ class Bezier:
 		for char in self.path_command:
 			if char.isalpha():
 				coordinate_string += ","
+			elif char == "-":
+				coordinate_string += ",-"
 			else:
 				coordinate_string += char
 
@@ -29,19 +31,24 @@ class Bezier:
 		
 		coordinate_string = coordinate_string.split(",")
 
+		coordinate_string = [float(num) for num in coordinate_string]
+		print(coordinate_string)
+
 		# Pairs the coordinates (x,y)
 		i = 1
 		coordinates = []
 		for num in coordinate_string:
 			if i % 2 == 0:
-				coord.append(float(num))
+				coord.append(num)
 				coordinates.append(coord)
 			else: # This case happens first
-				coord = [float(num)]
+				coord = [num]
 			i += 1
 
 		for coord in coordinates:
 			self.p.append(Node(coord[0], coord[1]))
+
+		
 
 	def B_x(self, t):
 		c0 = (1 - t)**3*self.p[0].x
@@ -57,7 +64,7 @@ class Bezier:
 		c3 = t**3*self.p[3].y
 		return c0 + c1 + c2 + c3
 
-test = Bezier("M184.7,207.5C361,31.2,793.9,322,184.7,736.5")
+test = Bezier("M79.8,80.3C315.2,331.6,345.2-122.6,81,157")
 
 for i in range(11):
 	t = i/10
