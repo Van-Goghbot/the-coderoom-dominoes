@@ -67,6 +67,7 @@ class PickAndPlace(object):
                 print("")
         else:
             rospy.logerr("INVALID POSE - No Valid Joint Solution Found.")
+            print("TEST LINE 70")
             return False
         return limb_joints
 
@@ -112,17 +113,17 @@ class PickAndPlace(object):
 
 def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
                        table_reference_frame="world",
-                       block1_pose=Pose(position=Point(x=0.7, y=0.6, z=0.8)),
+                       block1_pose=Pose(position=Point(x=0.75, y=0.6, z=0.76)),
                        block1_reference_frame="world",
-                       block2_pose=Pose(position=Point(x=0.7, y=0.6, z=0.84)),
+                       block2_pose=Pose(position=Point(x=0.75, y=0.6, z=0.80)),
                        block2_reference_frame="world",
-                       block3_pose=Pose(position=Point(x=0.7, y=0.6, z=0.88)),
+                       block3_pose=Pose(position=Point(x=0.75, y=0.6, z=0.84)),
                        block3_reference_frame="world",
-                       block4_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.76)),
+                       block4_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.76)),
                        block4_reference_frame="world",
-                       block5_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.8)),
+                       block5_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.80)),
                        block5_reference_frame="world",
-                       block6_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.84)),
+                       block6_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.84)),
                        block6_reference_frame="world"):
     # Load Table SDF
     table_xml = ''
@@ -308,45 +309,96 @@ def main():
         left_pnp._guarded_move_to_joint_position(left_joint_angles)
         right_pnp._guarded_move_to_joint_position(right_joint_angles)
 
+    def place(x,y,z,r,p,ya):
+        if y >= 0:
+            arm = 'l'
+        elif y <= 0:
+            arm = 'r'
+        move(arm,x,y,z+0.1,r,p,ya)
+        move(arm,x,y,z,r,p,ya)
+        if arm == 'l':
+            left_pnp.gripper_open()
+        if arm == 'r':
+            right_pnp.gripper_open()
+        move(arm,x,y,z+0.1,r,p,ya)
+        safe_point()
+        return x,y,z+0.1,r,p,ya
+
+    def pick(arm):
+        if arm == 'l':
+            #Move to 0.7,0.6,0.3,0,3.14/2,0
+            brick_place('l',0.9532,-0.7656,-0.8165,2.338,1.129,-0.9882,0.0689)
+            left_pnp.gripper_open()
+            coord = move('l',0.8,0.6,0.3,0,3.14/2,0)
+            left_pnp.gripper_close()
+            brick_place('l',0.9532,-0.7656,-0.8165,2.338,1.129,-0.9882,0.0689)
+            safe_point()
+        elif arm == 'r':
+            #Move to 0.7,-0.6,0.3,0,3.14/2,0
+            coord = move('r',0.6,-0.6,0.3,0,3.14/2,0)
+            right_pnp.gripper_open()
+            coord = move('r',0.8,-0.6,0.3,0,3.14/2,0)
+            right_pnp.gripper_close()
+            coord = move('r',0.6,-0.6,0.3,0,3.14/2,0)
+            safe_point()
+
+    def pickandplace(x,y,z,r,p,ya):
+        if y >= 0:
+            arm = 'l'
+        elif y <= 0:
+            arm = 'r'
+        pick(arm)
+        place(x,y,z,r,p,ya)
+
+
+    def brick_place(arm,s0,s1,e0,e1,w0,w1,w2):
+        joint_angles = {'left_s0': s0,
+                     'left_s1': s1,
+                     'left_e0': e0,
+                     'left_e1': e1,
+                     'left_w0': w0,
+                     'left_w1': w1,
+                     'left_w2': w2
+                     }
+        if arm == 'l':
+            left_pnp._guarded_move_to_joint_position(joint_angles)
+        elif arm == 'r':
+            right_pnp._guarded_move_to_joint_position(joint_angles)
+
     #Load models
     load_gazebo_models()
 
-    safe_point()
+    #safe_point()
 
     #Pick up left brick 1
-    coord = move('l',0.6,0.3,0.3,0,3.14,0)
-    coord = move('l',0.7,0.6,0.3,0,3.14,0)
-    left_pnp.gripper_open()
-    coord = move('l',0.7,0.6,0.17,0,3.14,0)
-    left_pnp.gripper_close()
-    coord = move('l',0.7,0.6,0.3,0,3.14,0)
-    safe_point()
+    # pickandplace(0.7692841534814815,-0.5479860820740741,0.15,0,3.14,0)
+    # pickandplace(0.9018232865185186,-0.5120001445925926,0.15,0,3.14,0)
+    # pickandplace(0.9845012361481481,-0.38774743940740747,0.15,0,3.14,0)
+    # pickandplace(0.973423472,-0.23583320800000002,0.15,0,3.14,0)
+    # pickandplace(0.9322231851851851,-0.09240292592592596,0.15,0,3.14,0)
+    #pickandplace(0.8848077439999998,0.04609798400000002,0.15,0,3.14,0)
 
-    #coord = move('l',0.6,0.1,0.3,0,3.14,0)
-    coord = move('l',0.906,-0.17,0.21,0,1.727,-1.4166)
-    left_pnp.gripper_open()
-    coord = move('l',0.906,-0.17,0.3,0,1.727,-1.4166)
-    safe_point()
+    position1 = [0.7692841534814815,-0.5479860820740741,0.15,-1.4832296975868564,3.14,0]
+    position2 = [0.9018232865185186,-0.5120001445925926,0.15,-1.053420499535529,3.14,0]
+    position3 = [0.9845012361481481,-0.38774743940740747,0.15,-0.14841348102091267,3.14,0]
+    position4 = [0.973423472,-0.23583320800000002,0.15,0.21738343878129116,3.14,0]
+    position5 = [0.9322231851851851,-0.09240292592592596,0.15,0.3201278688721856,3.14,0]
+    position6 = [0.8848077439999998,0.04609798400000002,0.15,0.3266637223869834,3.14,0]
+    position7 = [0.8407259211851852,0.191439770074074,0.15,0.24265457744601776,3.14,0]
+    position8 = [0.821643264,0.340000704,0.15,-0.04455551744798016,3.14,0]
+    position9 = [0.8777552574814814,0.47205806192592603,0.15,-0.8439595442470305,3.14,0]
+    position10 = [1.010180084148148,0.5266014885925927,0.15,-1.4168222996663273,3.14,0]
+    positions = [position1,position2,position3,position4,position5,position6,position7,position8,position9,position10]
 
-    # #Pick up right brick 1
-    # coord = move('r',0.6,-0.3,0.3,0,3.14,0)
-    # coord = move('r',0.7,-0.6,0.3,0,3.14,0)
-    # right_pnp.gripper_open()
-    # coord = move('r',0.7,-0.6,0.17,0,3.14,0)
-    # right_pnp.gripper_close()
-    # coord = move('r',0.7,-0.6,0.3,0,3.14,0)
-    #coord = move('l',0.94,0.1,0.21,0,1.884,-1.256)
-
-    # coord = move('r',0.7692841534814815,-0.5479860820740741,0.15,-1.4832296975868564,3.14/2,0)
-    # coord = move('r',0.9018232865185186,-0.5120001445925926,0.15,-1.053420499535529,3.14/2,0)
-    # coord = move('r',0.9845012361481481,-0.38774743940740747,0.15,-0.14841348102091267,3.14/2,0)
-    # coord = move('r',0.973423472,-0.23583320800000002,0.15,0.21738343878129116,3.14/2,0)
-    # coord = move('r',0.9322231851851851,-0.09240292592592596,0.15,0.3201278688721856,3.14/2,0)
-    # coord = move('r',0.8848077439999998,0.04609798400000002,0.15,0.3266637223869834,3.14/2,0)
-    # coord = move('r',0.8407259211851852,0.191439770074074,0.15,0.24265457744601776,3.14/2,0)
-    # coord = move('r',0.821643264,0.340000704,0.15,-0.04455551744798016,3.14/2,0)
-    # coord = move('r',0.8777552574814814,0.47205806192592603,0.15,-0.8439595442470305,3.14/2,0)
-    # coord = move('r',1.010180084148148,0.5266014885925927,0.15,-1.4168222996663273,3.14/2,0)
+    for i in range(len(positions)):
+        pose = positions[i]
+        if pose[1]>=0:
+            arm = 'l'
+        if pose[1]<0:
+            arm = 'r'
+        safe_point()
+        move(arm,-0.1+pose[0],pose[1],pose[2],pose[5],pose[4],pose[3])
+        safe_point()
 
     delete_gazebo_models()
 
