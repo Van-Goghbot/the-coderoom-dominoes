@@ -118,5 +118,5 @@ with open('output.csv', 'w', newline='') as csvfile:
 
 		angle = math.atan2(dy,dx)
 
-		writer.writerow([x, y, 0.15, angle, 0, 0])
+		writer.writerow([y, x, 0.15, angle, 0, 0])
 	

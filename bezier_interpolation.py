@@ -1,11 +1,12 @@
 import math
+import bezier_conversion
 
 rad_conv = math.pi / 180
 
-angle_1 = -20
+angle_1 = -80
 x1, y1 = (10, 10)
 
-angle_2 = 10
+angle_2 = 20
 x2, y2 = (110, 40)
 
 svg = """<svg version="1.1" baseProfile="basic" id="Layer_1"
@@ -20,7 +21,7 @@ brick_2 = f'<rect width="6" height="9" style="fill:rgb(255,106,5);stroke-width:1
 svg = svg.format(brick_1 + '{0}')
 svg = svg.format(brick_2 + '{0}')
 
-length = 100
+length = 60
 handle_1_dx = length * math.cos(angle_1 * rad_conv)
 handle_1_dy = length * math.sin(angle_1 * rad_conv)
 
@@ -47,6 +48,29 @@ path = f'<path fill="none" stroke="#000000" stroke-width="1.2587" stroke-miterli
 svg = svg.format(line_1 + '{0}')
 svg = svg.format(line_2 + '{0}')
 svg = svg.format(path+ '{0}')
+
+brick_path = bezier_conversion.Bezier(f"M{P0_x},{P0_y}C{P1_x},{P1_y},{P2_x},{P2_y},{P3_x},{P3_y}")
+brick_path.length_approximation(150)
+
+dt = 0.01
+
+spacing = 15
+bricks = math.floor(brick_path.length/spacing)
+
+for i in range(bricks+1):
+	try:
+		t = brick_path.t_map[round(i*spacing,3)]
+	except KeyError:
+		t = 1
+	x = brick_path.B_x(t)
+	y = brick_path.B_y(t)
+	conversion = 180 / math.pi
+	dy = brick_path.B_y(t + dt) - brick_path.B_y(t - dt)
+	dx = brick_path.B_x(t + dt) - brick_path.B_x(t - dt)
+	angle = math.atan2(dy,dx) * conversion
+	svg = svg.format(f'<rect width="6" height="9" style="fill:rgb(255,106,5);stroke-width:1;stroke:rgb(0,0,0)" x="{x}" y="{y}" transform="rotate({angle} {x} {y}) translate(-3 -4.5)" />' + '{0}')
+	svg = svg.format(f'<line x1="{brick_path.B_x(t + dt)}" y1="{brick_path.B_y(t + dt)}" x2="{brick_path.B_x(t - dt)}" y2="{brick_path.B_y(t - dt)}" stroke="black"/>' + '{0}')
+
 
 with open('interpolation.svg', 'w') as svgfile:
 	svgfile.write(svg)
