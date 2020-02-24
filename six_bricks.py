@@ -107,21 +107,22 @@ class PickAndPlace(object):
     def _servo_to_pose(self, pose):
         # servo down to release
         joint_angles = self.ik_request(pose)
+        print (joint_angles)
         self._guarded_move_to_joint_position(joint_angles)
 
 def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
                        table_reference_frame="world",
-                       block1_pose=Pose(position=Point(x=0.7, y=0.6, z=0.72)),
+                       block1_pose=Pose(position=Point(x=0.7, y=0.6, z=0.8)),
                        block1_reference_frame="world",
-                       block2_pose=Pose(position=Point(x=0.7, y=0.6, z=0.76)),
+                       block2_pose=Pose(position=Point(x=0.7, y=0.6, z=0.84)),
                        block2_reference_frame="world",
-                       block3_pose=Pose(position=Point(x=0.7, y=0.6, z=0.80)),
+                       block3_pose=Pose(position=Point(x=0.7, y=0.6, z=0.88)),
                        block3_reference_frame="world",
-                       block4_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.72)),
+                       block4_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.76)),
                        block4_reference_frame="world",
-                       block5_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.76)),
+                       block5_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.8)),
                        block5_reference_frame="world",
-                       block6_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.80)),
+                       block6_pose=Pose(position=Point(x=0.7, y=-0.6, z=0.84)),
                        block6_reference_frame="world"):
     # Load Table SDF
     table_xml = ''
@@ -249,22 +250,9 @@ def main():
     quat_front = tf.transformations.quaternion_from_euler(roll,pitch,yaw)
     #Right facing position
 
-    # Starting Pose for left arm
-    left_pose = Pose()
-    left_pose.position.x = 0.579679836383
-    left_pose.position.y = 0.283311769707
-    left_pose.position.z = 0.213676720426
-    left_pose.orientation.x = -0.0249590815779
-    left_pose.orientation.y = 0.999649402929
-    left_pose.orientation.z = 0.00737916180073
-    left_pose.orientation.w = 0.00486450832011
-
     # Initialise pick and place
     left_pnp = PickAndPlace('left', hover_distance)
     right_pnp = PickAndPlace('right', hover_distance)
-
-    # Go to start arm position
-    #left_pnp.move_to_start(left_pnp.ik_request(left_pose))
 
     def move(arm,x,y,z,r,p,ya):
         quat = tf.transformations.quaternion_from_euler(r,p,ya)
@@ -284,12 +272,6 @@ def main():
             left_pnp._servo_to_pose(pose)
         elif arm == 'r':
             right_pnp._servo_to_pose(pose)
-        #x0 = x
-        #y0 = y
-        #z0 = z
-        #r0 = r
-        #p0 = p
-        #ya0 = ya
         return x,y,z,r,p,ya
 
     def slow_move(arm,x,y,z,r,p,ya,steps):
@@ -305,8 +287,31 @@ def main():
             move(arm,(x+(steps-(i+1))*dx),(y+(steps-(i+1))*dy),(z+(steps-(i+1))*dz),(r+(steps-(i+1))*dr),(p+(steps-(i+1))*dp),(ya+(steps-(i+1))*dya))
         return x,y,z,r,p,ya
 
+    def safe_point():
+        left_joint_angles = {'left_s0': -0.08000397926829805,
+                     'left_s1': -0.9999781166910306,
+                     'left_e0': -1.189968899785275,
+                     'left_e1': 1.9400238130755056,
+                     'left_w0': 0.6699952259595108,
+                     'left_w1': 1.030009435085784,
+                     'left_w2': -0.4999997247485215
+                     }
+
+        right_joint_angles = {'right_s0': 0.08000397926829805,
+                      'right_s1': -0.9999781166910306,
+                      'right_e0': 1.189968899785275,
+                      'right_e1': 1.9400238130755056,
+                      'right_w0': -0.6699952259595108,
+                      'right_w1': 1.030009435085784,
+                      'right_w2': 0.4999997247485215
+                      }
+        left_pnp._guarded_move_to_joint_position(left_joint_angles)
+        right_pnp._guarded_move_to_joint_position(right_joint_angles)
+
     #Load models
     load_gazebo_models()
+
+    safe_point()
 
     #Pick up left brick 1
     coord = move('l',0.6,0.3,0.3,0,3.14,0)
@@ -315,16 +320,33 @@ def main():
     coord = move('l',0.7,0.6,0.17,0,3.14,0)
     left_pnp.gripper_close()
     coord = move('l',0.7,0.6,0.3,0,3.14,0)
-    coord = slow_move('l',0.94,0.1,0.21,0,1.884,-1.256,10)
+    safe_point()
 
-    #Pick up right brick 1
-    coord = move('r',0.6,-0.3,0.3,0,3.14,0)
-    coord = move('r',0.7,-0.6,0.3,0,3.14,0)
-    right_pnp.gripper_open()
-    coord = move('r',0.7,-0.6,0.17,0,3.14,0)
-    right_pnp.gripper_close()
-    coord = move('r',0.7,-0.6,0.3,0,3.14,0)
-    coord = move('l',0.94,0.1,0.21,0,1.884,-1.256)
+    #coord = move('l',0.6,0.1,0.3,0,3.14,0)
+    coord = move('l',0.906,-0.17,0.21,0,1.727,-1.4166)
+    left_pnp.gripper_open()
+    coord = move('l',0.906,-0.17,0.3,0,1.727,-1.4166)
+    safe_point()
+
+    # #Pick up right brick 1
+    # coord = move('r',0.6,-0.3,0.3,0,3.14,0)
+    # coord = move('r',0.7,-0.6,0.3,0,3.14,0)
+    # right_pnp.gripper_open()
+    # coord = move('r',0.7,-0.6,0.17,0,3.14,0)
+    # right_pnp.gripper_close()
+    # coord = move('r',0.7,-0.6,0.3,0,3.14,0)
+    #coord = move('l',0.94,0.1,0.21,0,1.884,-1.256)
+
+    # coord = move('r',0.7692841534814815,-0.5479860820740741,0.15,-1.4832296975868564,3.14/2,0)
+    # coord = move('r',0.9018232865185186,-0.5120001445925926,0.15,-1.053420499535529,3.14/2,0)
+    # coord = move('r',0.9845012361481481,-0.38774743940740747,0.15,-0.14841348102091267,3.14/2,0)
+    # coord = move('r',0.973423472,-0.23583320800000002,0.15,0.21738343878129116,3.14/2,0)
+    # coord = move('r',0.9322231851851851,-0.09240292592592596,0.15,0.3201278688721856,3.14/2,0)
+    # coord = move('r',0.8848077439999998,0.04609798400000002,0.15,0.3266637223869834,3.14/2,0)
+    # coord = move('r',0.8407259211851852,0.191439770074074,0.15,0.24265457744601776,3.14/2,0)
+    # coord = move('r',0.821643264,0.340000704,0.15,-0.04455551744798016,3.14/2,0)
+    # coord = move('r',0.8777552574814814,0.47205806192592603,0.15,-0.8439595442470305,3.14/2,0)
+    # coord = move('r',1.010180084148148,0.5266014885925927,0.15,-1.4168222996663273,3.14/2,0)
 
     delete_gazebo_models()
 
