@@ -108,7 +108,7 @@ class PickAndPlace(object):
     def _servo_to_pose(self, pose):
         # servo down to release
         joint_angles = self.ik_request(pose)
-        print (joint_angles)
+        #print (joint_angles)
         self._guarded_move_to_joint_position(joint_angles)
 
 def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
@@ -365,19 +365,33 @@ def main():
         elif arm == 'r':
             right_pnp._guarded_move_to_joint_position(joint_angles)
 
+    def knock_down(x,y,z):
+        if y >= 0:
+            arm = 'l'
+            offset = 0.1
+        elif y <= 0:
+            arm = 'r'
+            offset = -0.1
+        coord = move(arm,x,y+offset,z,0,3.14,0)
+        coord = move(arm,x,y-offset,z,0,3.14,0)
+
     #Load models
     load_gazebo_models()
 
     #safe_point()
 
-    #Pick up left brick 1
-    # pickandplace(0.7692841534814815,-0.5479860820740741,0.15,0,3.14,0)
-    # pickandplace(0.9018232865185186,-0.5120001445925926,0.15,0,3.14,0)
-    # pickandplace(0.9845012361481481,-0.38774743940740747,0.15,0,3.14,0)
-    # pickandplace(0.973423472,-0.23583320800000002,0.15,0,3.14,0)
-    # pickandplace(0.9322231851851851,-0.09240292592592596,0.15,0,3.14,0)
-    #pickandplace(0.8848077439999998,0.04609798400000002,0.15,0,3.14,0)
+    #Set up six bricks in a straight line
+    pickandplace(0.75,-0.3,0.15,0,3.14,3.14/2)
+    pickandplace(0.75,-0.2,0.15,0,3.14,3.14/2)
+    pickandplace(0.75,-0.1,0.15,0,3.14,3.14/2)
+    pickandplace(0.75,-0.0,0.15,0,3.14,3.14/2)
+    pickandplace(0.75,0.1,0.15,0,3.14,3.14/2)
+    pickandplace(0.75,0.2,0.15,0,3.14,3.14/2)
+    knock_down(0.75,-0.3,0.2)
 
+
+    #Attempt at Amy's coordinates
+    """
     position1 = [0.7692841534814815,-0.5479860820740741,0.15,-1.4832296975868564,3.14,0]
     position2 = [0.9018232865185186,-0.5120001445925926,0.15,-1.053420499535529,3.14,0]
     position3 = [0.9845012361481481,-0.38774743940740747,0.15,-0.14841348102091267,3.14,0]
@@ -399,7 +413,8 @@ def main():
         safe_point()
         move(arm,-0.1+pose[0],pose[1],pose[2],pose[5],pose[4],pose[3])
         safe_point()
-
+    """
+    safe_point()
     delete_gazebo_models()
 
 
