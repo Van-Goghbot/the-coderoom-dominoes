@@ -108,7 +108,7 @@ class PickAndPlace(object):
     def _servo_to_pose(self, pose):
         # servo down to release
         joint_angles = self.ik_request(pose)
-        print (joint_angles)
+        #print (joint_angles)
         self._guarded_move_to_joint_position(joint_angles)
 
 def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
@@ -250,7 +250,7 @@ def main():
         pose.orientation.z = quat[2]
         pose.orientation.w = quat[3]
 
-        print("x = {0}, y = {1}, z = {2}, roll = {3}, pitch = {4}, yaw = {5}".format(x,y,z,r,p,ya))
+        #print("x = {0}, y = {1}, z = {2}, roll = {3}, pitch = {4}, yaw = {5}".format(x,y,z,r,p,ya))
 
         if arm == 'l':
             left_pnp._servo_to_pose(pose)
@@ -274,45 +274,53 @@ def main():
 
     def safe_point():
         #Function to return arms to tucked position
-        left_joint_angles = {'left_s0': -0.08000397926829805,
-                     'left_s1': -0.9999781166910306,
-                     'left_e0': -1.189968899785275,
-                     'left_e1': 1.9400238130755056,
-                     'left_w0': 0.6699952259595108,
-                     'left_w1': 1.030009435085784,
-                     'left_w2': -0.4999997247485215
+        left_joint_angles = {'left_s0': -0.5929,
+                     'left_s1': -1.3422,
+                     'left_e0': 0.3146,
+                     'left_e1': 1.3544,
+                     'left_w0': 3.059-3.14,
+                     'left_w1': 1.5702,
+                     'left_w2': -1.072
                      }
 
-        right_joint_angles = {'right_s0': 0.08000397926829805,
-                      'right_s1': -0.9999781166910306,
-                      'right_e0': 1.189968899785275,
-                      'right_e1': 1.9400238130755056,
-                      'right_w0': -0.6699952259595108,
-                      'right_w1': 1.030009435085784,
-                      'right_w2': 0.4999997247485215
+        right_joint_angles = {'right_s0': -0.2823,
+                      'right_s1': -1.13965,
+                      'right_e0': 1.0771,
+                      'right_e1': 1.08657,
+                      'right_w0': -0.387,
+                      'right_w1': 1.8194,
+                      'right_w2': -1.7079
                       }
         left_pnp._guarded_move_to_joint_position(left_joint_angles)
         right_pnp._guarded_move_to_joint_position(right_joint_angles)
+        print ("Moving to safe point")
 
     def place(x,y,z,r,p,ya):
         #Function to hover and place bricks on the table
-        if y >= 0:
+        if y > 0:
             arm = 'l'
+            print ("Placing with left arm")
         elif y <= 0:
             arm = 'r'
-        move(arm,x,y,z+0.1,r,p,ya)
+            print ("Placing with right arm")
+        move(arm,x,y,z+0.15,r,p,ya)
         move(arm,x,y,z,r,p,ya)
         if arm == 'l':
             left_pnp.gripper_open()
         if arm == 'r':
             right_pnp.gripper_open()
-        move(arm,x,y,z+0.1,r,p,ya)
-        safe_point()
-        return x,y,z+0.1,r,p,ya
+        move(arm,x,y,z+0.15,r,p,ya)
+        #Move back to a safe point
+        if arm == 'l':
+            brick_place('l',-0.5929,-1.3422,0.3146,1.3544,3.059-3.14,1.5702,-1.072)
+        if arm == 'r':
+            brick_place('r',-0.2823,-1.13965,1.0771,1.08657,-0.387,1.8194,-1.7079)
+        return x,y,z+0.15,r,p,ya
 
     def pick(arm):
         #Function to pick up a brick with a given arm from a set position
         if arm == 'l':
+            print ("Picking with left arm")
             #Move to 0.5,0.8,0.5,0,3.14/2,0
             brick_place('l',1.045,-1.2174,-0.5546,1.8941,1.5558,-1.2412,-0.9172)
             left_pnp.gripper_open()
@@ -320,9 +328,12 @@ def main():
             left_pnp.gripper_close()
             brick_place('l',1.045,-1.2174,-0.5546,1.8941,1.5558,-1.2412,-0.9172)
             # #Move to 0.6,0.5,0.4,0,3.14,-0
-            brick_place('l',-0.5967,-1.344,0.3188,1.3571,3.059,-1.5673,-2.642)
-            coord = move('l',0.6,0.5,0.4,0,3.14,-3.14/2)
+            #brick_place('l',-0.5967,-1.344,0.3188,1.3571,3.059,-1.5673,-2.642)
+            #Move to 0.6,0.5,0.4,0,3.14,3.14/2
+            #brick_place('l',-0.5929,-1.3422,0.3146,1.3544,3.059,-1.5702,-1.072)
+            brick_place('l',-0.5929,-1.3422,0.3146,1.3544,3.059-3.14,1.5702,-1.072)
         elif arm == 'r':
+            print ("Picking with right arm")
             #Move tp 0.5,-0.8,0.5,0,3.14/2,0
             brick_place('r',-1.032,-1.222,0.5439,1.897,-1.5479,-1.239,0.9162)
             right_pnp.gripper_open()
@@ -331,11 +342,12 @@ def main():
             brick_place('r',-1.032,-1.222,0.5439,1.897,-1.5479,-1.239,0.9162)
             #Move to 0.6,-0.5,0.45,0,3.14,-0
             brick_place('r',-0.1652,-1.2395,0.81048,1.1156,-0.2439,1.7843,-0.222)
-            coord = move('r',0.6,-0.5,0.45,0,3.14,3.14/2)
+            #Move to 0.6,-0.5,0.45,0,3.14,3.14/2
+            brick_place('r',-0.2823,-1.13965,1.0771,1.08657,-0.387,1.8194,-1.7079)
 
     def pickandplace(x,y,z,r,p,ya):
         #Combined pick and place functions
-        if y >= 0:
+        if y > 0:
             arm = 'l'
         elif y <= 0:
             arm = 'r'
@@ -369,11 +381,17 @@ def main():
     def knock_down(x,y,z):
         #Function to knock down the arranged bricks
         if y >= 0:
+            print ("Knocking down with left arm")
             arm = 'l'
             offset = 0.1
+            brick_place('l',-0.5929,-1.3422,0.3146,1.3544,3.059-3.14,1.5702,-1.072)
+            left_pnp.gripper_close()
         elif y <= 0:
+            print ("Knocking down with right arm")
             arm = 'r'
             offset = -0.1
+            brick_place('r',-0.2823,-1.13965,1.0771,1.08657,-0.387,1.8194,-1.7079)
+            right_pnp.gripper_close()
         coord = move(arm,x,y+offset,z,0,3.14,0)
         coord = move(arm,x,y-offset,z,0,3.14,0)
 
@@ -419,14 +437,30 @@ def main():
     #Load models
     #load_gazebo_models()
 
-    #safe_point()
+    safe_point()
 
     #Test IK conditions
     #ik_test(0.8,-0.1,0.25,0,3.14/2,3.14/2)
     #coord = move('r',0.8,-0.1,0.25,0,3.14/2,3.14/2)
 
-    pick('r')
-    pick('l')
+    #Pick up bricks
+    #pick('r')
+    #pick('l')
+
+    #Robust algorithm for picking and placing 11 bricks
+    pickandplace(0.7,-0.5,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.4,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.3,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.2,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.1,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.0,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.1,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.2,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.3,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.4,0.23,0,3.14,3.14/2)
+    # pickandplace(0.7,0.5,0.23,0,3.14,3.14/2)
+    knock_down(0.7,-0.5,0.23)
+
 
     #delete_gazebo_models()
 
