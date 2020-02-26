@@ -43,7 +43,7 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	dt = 0.01
 
 	spacing = 14
-	bricks = math.floor(brick_path.length/spacing)
+	bricks = int(math.floor(brick_path.length/spacing))
 
 	spacing = brick_path.length/bricks
 
