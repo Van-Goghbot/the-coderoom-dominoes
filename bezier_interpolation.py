@@ -7,6 +7,9 @@ class Coordinate:
 		self.y = y
 		self.rot = rot
 
+	def __repr__(self):
+		return(str(self.x) + " " + str(self.y) + " " + str(self.rot))
+
 def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	rad_conv = math.pi / 180
 
@@ -67,9 +70,12 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 		dx = brick_path.B_x(t + dt) - brick_path.B_x(t - dt)
 		
 		angle = math.atan2(dy,dx)
+
+		#print(x, y)
 		
 		new_pose = Coordinate(x, y, angle)
 		brick_poses.append(new_pose)
+		print(brick_poses, brick_poses[-1].x)
 
 	return brick_poses
 
