@@ -16,9 +16,6 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	angle_2 = end_rot
 	x2, y2 = (end_x, end_y)
 
-	svg = svg.format(brick_1 + '{0}')
-	svg = svg.format(brick_2 + '{0}')
-
 	length = 100
 	handle_1_dx = length * math.cos(angle_1 * rad_conv)
 	handle_1_dy = length * math.sin(angle_1 * rad_conv)
