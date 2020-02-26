@@ -38,7 +38,9 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	P3_x = x2
 	P3_y = y2
 
-	brick_path = bezier_conversion.Bezier("M" + str(P0_x) + "," + str(P0_y) + "C" str(P1_x) + "," + str(P1_y) + "," str(P2_x) + "," + str(P2_y) + "," + str(P3_x) + "," + str(P3_y))
+	bezier_string = "M" + str(P0_x) + "," + str(P0_y) + "C" + str(P1_x) + "," + str(P1_y) + "," str(P2_x) + "," + str(P2_y) + "," + str(P3_x) + "," + str(P3_y)
+
+	brick_path = bezier_conversion.Bezier(bezier_string)
 	brick_path.length_approximation(150)
 
 	dt = 0.01
