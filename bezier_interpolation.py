@@ -53,6 +53,7 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	print(spacing)
 
 	brick_poses = []
+	print(brick_path.t_map)
 
 	for i in range(bricks+1):
 		try:
@@ -75,7 +76,7 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 		
 		new_pose = Coordinate(x, y, angle)
 		brick_poses.append(new_pose)
-		print(brick_poses, brick_poses[-1].x)
+		# print(brick_poses, brick_poses[-1].x)
 
 	return brick_poses
 

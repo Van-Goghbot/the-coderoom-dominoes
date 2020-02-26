@@ -36,7 +36,7 @@ class Bezier:
 		coordinate_string = coordinate_string.split(",")
 
 		coordinate_string = [float(num) for num in coordinate_string]
-		print(coordinate_string)
+		# print(coordinate_string)
 
 		# Pairs the coordinates (x,y)
 		i = 1
@@ -51,8 +51,8 @@ class Bezier:
 
 		old_coord = (0, 0)
 		for coord in coordinates:
-			print(coord, old_coord)
-			print((coord[0] + old_coord[0], coord[1] + old_coord[1]))
+			# print(coord, old_coord)
+			# print((coord[0] + old_coord[0], coord[1] + old_coord[1]))
 			self.p.append(Node(coord[0], coord[1]))
 			old_coord = coord
 
