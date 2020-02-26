@@ -92,38 +92,3 @@ class Bezier:
 				old_x = x
 				
 			return self.length
-
-if __name__ == '__main__':
-	fish = Bezier("M5.1,44.4C9.5-23.2,114.8,86.9,113.3,7.9")
-	fish.length_approximation(150)
-	# print(fish.t_map)
-
-
-
-	dt = 0.01
-
-	svg = """<svg version="1.1" baseProfile="basic" id="Layer_1"
-		 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="120px" height="50px"
-		 viewBox="0 0 120 50" xml:space="preserve">
-	<path fill="#FFFFFF" stroke="#000000" stroke-width="1.2587" stroke-miterlimit="10" d="M5.1,44.4C9.5-23.2,114.8,86.9,113.3,7.9"/>
-	  {0}
-	</svg>"""
-
-
-	spacing = 15
-	bricks = math.floor(fish.length/spacing)
-
-	for i in range(bricks+1):
-		try:
-			t = fish.t_map[round(i*spacing,3)]
-		except KeyError:
-			t = 1
-		x = fish.B_x(t)
-		y = fish.B_y(t)
-		conversion = 180 / math.pi
-		dy = fish.B_y(t + dt) - fish.B_y(t - dt)
-		dx = fish.B_x(t + dt) - fish.B_x(t - dt)
-		angle = math.atan2(dy,dx) * conversion
-		svg = svg.format(f'<rect width="6" height="9" style="fill:rgb(255,106,5);stroke-width:1;stroke:rgb(0,0,0)" x="{x}" y="{y}" transform="rotate({angle} {x} {y}) translate(-3 -4.5)" />' + '{0}')
-		svg = svg.format(f'<line x1="{fish.B_x(t + dt)}" y1="{fish.B_y(t + dt)}" x2="{fish.B_x(t - dt)}" y2="{fish.B_y(t - dt)}" stroke="black"/>' + '{0}')
-	print(svg)
