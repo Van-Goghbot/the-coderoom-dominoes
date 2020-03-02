@@ -15,6 +15,10 @@ from std_msgs.msg import (Header, Empty)
 from baxter_core_msgs.srv import (SolvePositionIK, SolvePositionIKRequest)
 
 import baxter_interface
+import csv
+import listener
+import bezier_interpolation
+import order
 
 class PickAndPlace(object):
     def __init__(self, limb, hover_distance = 0.10, verbose=True):
@@ -111,49 +115,12 @@ class PickAndPlace(object):
         #print (joint_angles)
         self._guarded_move_to_joint_position(joint_angles)
 
-def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
-                       table_reference_frame="world",
-                       block1_pose=Pose(position=Point(x=0.75, y=0.6, z=0.76)),
-                       block1_reference_frame="world",
-                       block2_pose=Pose(position=Point(x=0.75, y=0.6, z=0.80)),
-                       block2_reference_frame="world",
-                       block3_pose=Pose(position=Point(x=0.75, y=0.6, z=0.84)),
-                       block3_reference_frame="world",
-                       block4_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.76)),
-                       block4_reference_frame="world",
-                       block5_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.80)),
-                       block5_reference_frame="world",
-                       block6_pose=Pose(position=Point(x=0.75, y=-0.6, z=0.84)),
-                       block6_reference_frame="world"):
+def load_table(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
+                       table_reference_frame="world"):
     # Load Table SDF
     table_xml = ''
     with open ("models/table/model.sdf", "r") as table_file:
         table_xml=table_file.read().replace('\n', '')
-
-    # Load Brick SDF
-    block1_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block1_file:
-        block1_xml=block1_file.read().replace('\n', '')
-
-    block2_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block2_file:
-        block2_xml=block2_file.read().replace('\n', '')
-
-    block3_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block3_file:
-        block3_xml=block3_file.read().replace('\n', '')
-
-    block4_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block4_file:
-        block4_xml=block4_file.read().replace('\n', '')
-
-    block5_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block5_file:
-        block5_xml=block5_file.read().replace('\n', '')
-
-    block6_xml = ''
-    with open ("models/Brick/model.sdf", "r") as block6_file:
-        block6_xml=block6_file.read().replace('\n', '')
 
     # Spawn Table SDF
     rospy.wait_for_service('/gazebo/spawn_sdf_model')
@@ -164,6 +131,30 @@ def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
     except rospy.ServiceException, e:
         rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
+def load_brick(r_count):
+    if r_count == 0:
+        load_brick1()
+    elif count == 1:
+        load_rbrick2
+    elif count == 2:
+        load_rbrick2
+    elif count == 3:
+        load_rbrick2
+    elif count == 4:
+        load_rbrick2
+    elif count == 5:
+        load_rbrick2
+    elif count == 6:
+        load_rbrick2
+
+
+def load_brick1(block1_pose=Pose(position=Point(x=0.65, y=-0.8, z=1.13)),
+                       block1_reference_frame="world"):
+    # Load Brick SDF
+    block1_xml = ''
+    with open ("models/Brick/model.sdf", "r") as block1_file:
+        block1_xml=block1_file.read().replace('\n', '')
+
     # Spawn Brick SDF
     rospy.wait_for_service('/gazebo/spawn_urdf_model')
     try:
@@ -173,6 +164,14 @@ def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
     except rospy.ServiceException, e:
         rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
+def load_brick2(block2_pose=Pose(position=Point(x=0.65, y=0.8, z=1.13)),
+                       block2_reference_frame="world"):
+    # Load Brick SDF
+    block2_xml = ''
+    with open ("models/Brick/model.sdf", "r") as block2_file:
+        block2_xml=block2_file.read().replace('\n', '')
+
+    # Spawn Brick SDF
     rospy.wait_for_service('/gazebo/spawn_urdf_model')
     try:
         spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
@@ -181,37 +180,6 @@ def load_gazebo_models(table_pose=Pose(position=Point(x=1.2, y=0.0, z=0.0)),
     except rospy.ServiceException, e:
         rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
-    rospy.wait_for_service('/gazebo/spawn_urdf_model')
-    try:
-        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
-        resp_sdf = spawn_sdf("brick3", block3_xml, "/",
-                               block3_pose, block3_reference_frame)
-    except rospy.ServiceException, e:
-        rospy.logerr("Spawn SDF service call failed: {0}".format(e))
-
-    rospy.wait_for_service('/gazebo/spawn_urdf_model')
-    try:
-        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
-        resp_sdf = spawn_sdf("brick4", block4_xml, "/",
-                               block4_pose, block4_reference_frame)
-    except rospy.ServiceException, e:
-        rospy.logerr("Spawn SDF service call failed: {0}".format(e))
-
-    rospy.wait_for_service('/gazebo/spawn_urdf_model')
-    try:
-        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
-        resp_sdf = spawn_sdf("brick5", block5_xml, "/",
-                               block5_pose, block5_reference_frame)
-    except rospy.ServiceException, e:
-        rospy.logerr("Spawn SDF service call failed: {0}".format(e))
-
-    rospy.wait_for_service('/gazebo/spawn_urdf_model')
-    try:
-        spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
-        resp_sdf = spawn_sdf("brick6", block6_xml, "/",
-                               block6_pose, block6_reference_frame)
-    except rospy.ServiceException, e:
-        rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
 def delete_gazebo_models():
     try:
@@ -295,7 +263,7 @@ def main():
         right_pnp._guarded_move_to_joint_position(right_joint_angles)
         print ("Moving to safe point")
 
-    def place(x,y,z,r,p,ya):
+    def place(x,y,z,r,p,ya,height):
         #Function to hover and place bricks on the table
         if y > 0:
             arm = 'l'
@@ -303,19 +271,21 @@ def main():
         elif y <= 0:
             arm = 'r'
             print ("Placing with right arm")
-        move(arm,x,y,z+0.15,r,p,ya)
+        move(arm,x,y,z+height,r,p,ya)
         move(arm,x,y,z,r,p,ya)
         if arm == 'l':
             left_pnp.gripper_open()
+            rospy.sleep(0.1)
         if arm == 'r':
             right_pnp.gripper_open()
-        move(arm,x,y,z+0.15,r,p,ya)
+            rospy.sleep(0.1)
+        move(arm,x,y,z+height,r,p,ya)
         #Move back to a safe point
         if arm == 'l':
             brick_place('l',-0.5929,-1.3422,0.3146,1.3544,3.059-3.14,1.5702,-1.072)
         if arm == 'r':
             brick_place('r',-0.2823,-1.13965,1.0771,1.08657,-0.387,1.8194,-1.7079)
-        return x,y,z+0.15,r,p,ya
+        return x,y,z+height,r,p,ya
 
     def pick(arm):
         #Function to pick up a brick with a given arm from a set position
@@ -325,6 +295,7 @@ def main():
             brick_place('l',1.045,-1.2174,-0.5546,1.8941,1.5558,-1.2412,-0.9172)
             left_pnp.gripper_open()
             coord = move('l',0.6,0.8,0.5,0,3.14/2,0)
+            load_brick2()
             left_pnp.gripper_close()
             brick_place('l',1.045,-1.2174,-0.5546,1.8941,1.5558,-1.2412,-0.9172)
             # #Move to 0.6,0.5,0.4,0,3.14,-0
@@ -338,6 +309,7 @@ def main():
             brick_place('r',-1.032,-1.222,0.5439,1.897,-1.5479,-1.239,0.9162)
             right_pnp.gripper_open()
             coord = move('r',0.6,-0.8,0.5,0,3.14/2,0)
+            #load_brick1()
             right_pnp.gripper_close()
             brick_place('r',-1.032,-1.222,0.5439,1.897,-1.5479,-1.239,0.9162)
             #Move to 0.6,-0.5,0.45,0,3.14,-0
@@ -345,14 +317,14 @@ def main():
             #Move to 0.6,-0.5,0.45,0,3.14,3.14/2
             brick_place('r',-0.2823,-1.13965,1.0771,1.08657,-0.387,1.8194,-1.7079)
 
-    def pickandplace(x,y,z,r,p,ya):
+    def pickandplace(x,y,z,r,p,ya,height):
         #Combined pick and place functions
         if y > 0:
             arm = 'l'
         elif y <= 0:
             arm = 'r'
         pick(arm)
-        place(x,y,z,r,p,ya)
+        place(x,y,z,r,p,ya,height)
 
 
     def brick_place(arm,s0,s1,e0,e1,w0,w1,w2):
@@ -406,25 +378,41 @@ def main():
         pose.orientation.y = quat[1]
         pose.orientation.z = quat[2]
         pose.orientation.w = quat[3]
-        if y >= 0:
-            limb_joints = left_pnp.ik_request(pose)
-            print ("IK limb joints:")
-            if limb_joints == False:
-                limb_joints = right_pnp.ik_request(pose)
-                if limb_joints == False:
-                    print ("FAILED COORDINATE")
-                else:
-                    print ("SUCCESSFUL COORDINATE")
-                    pass
-            else:
-                print ("SUCCESSFUL COORDINATE")
-                pass
-        elif y <= 0:
+
+        pose2 = Pose()
+        pose2.position.x = x
+        pose2.position.y = y
+        pose2.position.z = z + 0.15
+        pose2.orientation.x = quat[0]
+        pose2.orientation.y = quat[1]
+        pose2.orientation.z = quat[2]
+        pose2.orientation.w = quat[3]
+
+        if y <= 0:
             limb_joints = right_pnp.ik_request(pose)
-            print limb_joints
-            if limb_joints == False:
+            limb_joints_up = right_pnp.ik_request(pose2)
+            if limb_joints == False or limb_joints_up == False:
+                print ("Right arm failed")
                 limb_joints = left_pnp.ik_request(pose)
-                if limb_joints == False:
+                limb_joints_up = left_pnp.ik_request(pose2)
+                if limb_joints_up == False or limb_joints_up == False:
+                    print ("Try 2 - left failed")
+                    print ("FAILED COORDINATE")
+                else:
+                    print ("SUCCESSFUL COORDINATE")
+                    pass
+            else:
+                print ("SUCCESSFUL COORDINATE")
+                pass
+        elif y >= 0:
+            limb_joints = left_pnp.ik_request(pose)
+            limb_joints_up = left_pnp.ik_request(pose2)
+            if limb_joints == False or limb_joints_up == False:
+                print ("Left arm failed")
+                limb_joints = right_pnp.ik_request(pose)
+                limb_joints_up = right_pnp.ik_request(pose2)
+                if limb_joints == False or limb_joints_up == False:
+                    print ("Try 2 - right failed")
                     print ("FAILED COORDINATE")
                 else:
                     print ("SUCCESSFUL COORDINATE")
@@ -433,36 +421,99 @@ def main():
                 print ("SUCCESSFUL COORDINATE")
                 pass
 
-
-    #Load models
-    #load_gazebo_models()
+        return limb_joints,limb_joints_up
 
     safe_point()
+
+    #Get coordinates from the user
+    translations, angles = listener.get_coordinates()
+    start_x = translations[0][1] * 100 + 60
+    start_y = (translations[0][0] + 0.1) * -100 + 120
+    start_angle = angles[0][2] - 3.1415/2
+    end_x = translations[1][1] * 100 + 60
+    end_y = (translations[1][0] + 0.1) * -100 + 120
+    end_angle = angles[1][2] - 3.1415/2
+    print start_x, start_y, ((3.14/2) + start_angle)
+    print end_x, end_y, ((3.14/2) + end_angle)
+
+    #Get Bezier coordinates
+    #coords = bezier_interpolation.create_path(start_x, start_y, start_angle, end_x, end_y, end_angle)
+    coords = bezier_interpolation.create_path(10,35,20,110,40,10)
+
+    check_list = []
+
+    right = []
+    left = []
+
+    for brick in coords:
+        if brick.y <= 0:
+            right.append((float(brick.y), float(brick.x), float(brick.rot)))
+        else:
+            left.append((float(brick.y), float(brick.x), float(brick.rot)))
+        error_check = ik_test(round(brick.y, 3),round(brick.x, 3),0.23,0,3.14,brick.rot)
+        if error_check[0] == False:
+            check_list.append(error_check[0])
+        if error_check[1] == False:
+            check_list.append(error_check[1])
+
+    right.sort()
+
+    right = right[::-1]
+    print('right')
+    print(right)
+
+    left.sort()
+    print('left')
+    print(left)
+
+    ordered_coords = left + right
+
+    print('coord\n' + str(coords))
+    print('ordered\n' + str(ordered_coords))
+
+    #Load models
+    load_table()
+
+    """
+    if len(check_list) > 0:
+        print ("Failed Path")
+    else:
+        for brick in ordered_coords:
+            safe_point()
+
+    """
+
+    #safe_point()
 
     #Test IK conditions
     #ik_test(0.8,-0.1,0.25,0,3.14/2,3.14/2)
     #coord = move('r',0.8,-0.1,0.25,0,3.14/2,3.14/2)
 
     #Pick up bricks
-    #pick('r')
-    #pick('l')
+    # pick('r')
+    # pick('l')
 
-    #Robust algorithm for picking and placing 11 bricks
-    pickandplace(0.7,-0.5,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,-0.4,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,-0.3,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,-0.2,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,-0.1,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.0,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.1,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.2,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.3,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.4,0.23,0,3.14,3.14/2)
-    # pickandplace(0.7,0.5,0.23,0,3.14,3.14/2)
-    knock_down(0.7,-0.5,0.23)
+    #Robust algorithm for picking and placing bricks in a straight line
+    # pickandplace(0.7,0.0,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.1,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,0.1,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.2,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,0.2,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.3,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,0.3,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,-0.4,0.25,0,3.14,3.14/2)
+    # pickandplace(0.7,0.4,0.25,0,3.14,3.14/2)
+    # knock_down(0.7,-0.5,0.23)
 
+    #Robust algorithm for picking and placing bricks in a straight line
+    # pickandplace(0.7,0.0,0.25,0,3.14,3.14/2)
+    # pickandplace(0.71,-0.1,0.25,0,3.14,3.14/2+0.2)
+    # pickandplace(0.7,0.1,0.25,0,3.14,3.14/2)
+    # pickandplace(0.70,-0.2,0.25,0,3.14,3.14/2+0.2)
+    # pickandplace(0.7,0.2,0.25,0,3.14,3.14/2)
+    # pickandplace(0.73,-0.3,0.25,0,3.14,3.14/2+0.2)
 
-    #delete_gazebo_models()
+    delete_gazebo_models()
 
 
 if __name__ == '__main__':
