@@ -11,8 +11,6 @@ class Coordinate:
 		return(str(self.x) + " " + str(self.y) + " " + str(self.rot))
 
 def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
-	rad_conv = math.pi / 180
-
 	angle_1 = start_rot
 	x1, y1 = (start_x, start_y)
 
@@ -20,11 +18,11 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 	x2, y2 = (end_x, end_y)
 
 	length = 100
-	handle_1_dx = length * math.cos(angle_1 * rad_conv)
-	handle_1_dy = length * math.sin(angle_1 * rad_conv)
+	handle_1_dx = length * math.cos(angle_1)
+	handle_1_dy = length * math.sin(angle_1)
 
-	handle_2_dx = length * math.cos(angle_2 * rad_conv)
-	handle_2_dy = length * math.sin(angle_2 * rad_conv)
+	handle_2_dx = length * math.cos(angle_2)
+	handle_2_dy = length * math.sin(angle_2)
 
 	P0_x = x1
 	P0_y = y1
