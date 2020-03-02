@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 import rospy
 import tf
-if __name__ == '__main__':
-	""" A simple example of tf listener """
-	rospy.init_node('example_tf_listener')
+
+def get_coordinates():
+	#rospy.init_node('example_tf_listener')
 	listener = tf.TransformListener()
 	rate = rospy.Rate(10.0)
-	while not rospy.is_shutdown():
+
+	translations = []
+	angles = []
+
+	quantity = 0
+	while not rospy.is_shutdown() and quantity != 2:
 		try:
 			(l_trans,l_rot) = listener.lookupTransform('left_gripper', 'base', rospy.Time(0))
 			(r_trans,r_rot) = listener.lookupTransform('right_gripper', 'base', rospy.Time(0))
@@ -22,9 +27,13 @@ if __name__ == '__main__':
 				trans, rot = r_trans, r_rot
 			Translation = trans
 			Quaternion = rot
-			Angles = tf.transformations.euler_from_quaternion(rot)
+			Angle = tf.transformations.euler_from_quaternion(rot)
+			translations.append(trans)
+			angles.append(tf.transformations.euler_from_quaternion(rot))
 			print("Translation: ", Translation)
 			print("Quaternion: ", Quaternion)
-			print("Angles: ", Angles)
+			print("Angles: ", Angle)
 			print("")
+			quantity += 1
 		rate.sleep()
+	return translations, angles
