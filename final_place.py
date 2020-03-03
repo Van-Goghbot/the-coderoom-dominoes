@@ -19,6 +19,8 @@ import csv
 import listener
 import bezier_interpolation
 import order
+import functions
+import subprocess
 
 class PickAndPlace(object):
     def __init__(self, limb, hover_distance = 0.10, verbose=True):
@@ -427,11 +429,11 @@ def main():
 
     #Get coordinates from the user
     translations, angles = listener.get_coordinates()
-    start_x = translations[0][1] * 100 + 60
-    start_y = (translations[0][0] + 0.1) * -100 + 120
+    start_x = translations[0][0] * 100 + 60
+    start_y = (translations[0][1] + 0.1) * -100 + 120
     start_angle = angles[0][2] - 3.1415/2
-    end_x = translations[1][1] * 100 + 60
-    end_y = (translations[1][0] + 0.1) * -100 + 120
+    end_x = translations[1][0] * 100 + 60
+    end_y = (translations[1][1] + 0.1) * -100 + 120
     end_angle = angles[1][2] - 3.1415/2
     print start_x, start_y, ((3.14/2) + start_angle)
     print end_x, end_y, ((3.14/2) + end_angle)
@@ -446,6 +448,8 @@ def main():
     left = []
 
     for brick in coords:
+        print("brick")
+        print float(brick.y), float(brick.x), float(brick.rot)
         if brick.y <= 0:
             right.append((float(brick.y), float(brick.x), float(brick.rot)))
         else:
@@ -459,29 +463,29 @@ def main():
     right.sort()
 
     right = right[::-1]
-    print('right')
-    print(right)
+    #print('right')
+    #print(right)
 
     left.sort()
-    print('left')
-    print(left)
+    #print('left')
+    #print(left)
 
     ordered_coords = left + right
 
-    print('coord\n' + str(coords))
-    print('ordered\n' + str(ordered_coords))
+    #print('coord\n' + str(coords))
+    #print('ordered\n' + str(ordered_coords))
 
     #Load models
     load_table()
 
-    """
+    
     if len(check_list) > 0:
         print ("Failed Path")
     else:
         for brick in ordered_coords:
-            safe_point()
+            print (brick[1],brick[0])
+            pickandplace(brick[1],brick[0],0.23,0,3.14,brick[2],0.15)
 
-    """
 
     #safe_point()
 

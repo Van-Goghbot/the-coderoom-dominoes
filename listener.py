@@ -14,6 +14,7 @@ def get_coordinates():
 	while not rospy.is_shutdown() and quantity != 2:
 		try:
 			(l_trans,l_rot) = listener.lookupTransform('left_gripper', 'base', rospy.Time(0))
+			print l_trans,l_rot
 			(r_trans,r_rot) = listener.lookupTransform('right_gripper', 'base', rospy.Time(0))
 		except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
 			continue
@@ -36,4 +37,9 @@ def get_coordinates():
 			print("")
 			quantity += 1
 		rate.sleep()
+		print translations,angles
 	return translations, angles
+
+if __name__ == '__main__':
+	rospy.init_node("ik_pick_and_place_demo")
+	get_coordinates()
