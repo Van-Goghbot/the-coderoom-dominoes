@@ -76,7 +76,7 @@ class Bezier:
 			self.t_map = {}
 			old_x = None
 			old_y = None
-			for i in range(resolution+1):
+			for i in range(int(resolution)+1):
 				t = i/resolution
 				x = self.B_x(t)
 				y = self.B_y(t)

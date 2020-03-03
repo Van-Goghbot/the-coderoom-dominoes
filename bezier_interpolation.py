@@ -48,10 +48,10 @@ def create_path(start_x, start_y, start_rot, end_x, end_y, end_rot):
 
 	spacing = brick_path.length/bricks
 
-	print(spacing)
+	#print(spacing)
 
 	brick_poses = []
-	print(brick_path.t_map)
+	#print(brick_path.t_map)
 
 	for i in range(bricks+1):
 		try:
