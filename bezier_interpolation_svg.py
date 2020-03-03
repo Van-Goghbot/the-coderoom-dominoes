@@ -1,13 +1,15 @@
 import math
 import bezier_conversion
 
-rad_conv = math.pi / 180
+rad_conv = 1
 
-angle_1 = 20
-x1, y1 = (10, 30)
+# change me
+angle_1 = -1.5
+x1, y1 = (60, 70)
 
-angle_2 = 20
-x2, y2 = (110, 30)
+# change me
+angle_2 = -2.33
+x2, y2 = (-60, 70)
 
 svg = """<svg version="1.1" baseProfile="basic" id="Layer_1"
 	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="600px" height="250px"
@@ -21,6 +23,7 @@ brick_2 = f'<rect width="6" height="9" style="fill:rgb(255,106,5);stroke-width:1
 svg = svg.format(brick_1 + '{0}')
 svg = svg.format(brick_2 + '{0}')
 
+# change me
 length = 100
 handle_1_dx = length * math.cos(angle_1 * rad_conv)
 handle_1_dy = length * math.sin(angle_1 * rad_conv)
